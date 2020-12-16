@@ -8,16 +8,17 @@ jobs:
     runs-on: ubuntu-16.04
     steps:
       - uses: actions/checkout@v2
-        
+
       - name: Setup Libs
-        run: | 
+        run: |
           # remove MySQL5.7
           mysql --version
           sudo apt-get remove --purge mysql-server mysql-client mysql-common && sudo apt-get autoremove && sudo apt-get autoclean && sudo deluser mysql && sudo rm -rf /var/lib/mysql && sudo apt-get purge mysql-server-core-5.7 && sudo apt-get purge mysql-client-core-5.7 && sudo rm -rf /var/log/mysql && sudo rm -rf /etc/mysql
-          # sudo apt-get purge mysql-server*        
+          # sudo apt-get purge mysql-server*
           sudo add-apt-repository 'deb http://archive.ubuntu.com/ubuntu trusty universe'
           sudo apt-get update
-          
+
+
           # Install apt
           sudo apt-get install autoconf bison build-essential gcc-6 g++-6 libyaml-dev libreadline6-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm-dev mysql-server-5.6 mysql-client-5.6
           # sudo apt-get install autoconf bison build-essential gcc-6 g++-6 libyaml-dev libreadline6-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm5 libgdbm-dev mysql-server mysql-client libmysqlclient-dev
@@ -31,16 +32,16 @@ jobs:
           cd ~/.src/libmysqlclient
           sudo dpkg -i libmysqlclient18_5.6.25-0ubuntu1_amd64.deb
           sudo dpkg -i libmysqlclient-dev_5.6.25-0ubuntu1_amd64.deb
-          
+
       - name: Cache OpenSSL1.0
         uses: actions/cache@v1
         id: cache_openssl
         with:
           path: /opt/openssl
           key: openssl1.0
-          
+
       - name: Install OpenSSL1.0
-        if: steps.cache_openssl.outputs.cache-hit != 'true'          
+        if: steps.cache_openssl.outputs.cache-hit != 'true'
         run: |
           mkdir -p ~/.src/openssl
           cd ~/.src/openssl          
@@ -53,7 +54,7 @@ jobs:
         id: cache_rbenv
         with:
           path: /home/runner/.rbenv
-          key: ${{ runner.os }}-rbenv-${{ hashFiles('**/.ruby-version') }}
+          key: ruby-2.1.2
           
       - name: Install Rbenv
         if: steps.cache_rbenv.outputs.cache-hit != 'true'
@@ -82,11 +83,12 @@ jobs:
         id: cached-gems      
         with:
           path: vendor/bundle
-          key: ${{ runner.os }}-gem-${{ hashFiles('**/Gemfile.lock') }}
+          key: gem-${{ hashFiles('**/Gemfile.lock') }}
 
       - name: Install Gems
         run: |
           source ~/.bash_profile
           rbenv exec gem install bundler -v 1.6.5
           RAILS_ENV=test bundle install --path vendor/bundle --jobs=4
+
 
